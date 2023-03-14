@@ -1,0 +1,213 @@
+# RTX1300 Rev.23.00.04 (Wed Aug 10 11:40:27 2022)
+# MAC Address : ac:44:f2:b6:6f:00 - ac:44:f2:b6:6f:07
+# Memory 1024Mbytes, 8LAN
+# main:  RTX1300 ver=00 serial=S78002132 MAC-Address=ac:44:f2:b6:6f:00 - ac:44:f2:b6:6f:07
+# Reporting Date: Mar 12 15:07:50 2023
+administrator password encrypted *
+login user admin *
+user attribute admin administrator=2 connection=serial,telnet,remote,ssh,sftp,http gui-page=dashboard,lan-map,config login-timer=1800
+login timer 1800
+ip route default gateway tunnel 1
+ip route 192.168.100.0/24 gateway tunnel 2
+ipv6 routing on
+ipv6 route 240b:250:7c00:1300::/64 gateway tunnel 2
+ipv6 route default gateway dhcp lan2
+ipv6 prefix 1 dhcp-prefix@lan2::/64
+lan flexible-port lan1=1-8,10 lan2=9
+ip lan1 address 192.168.200.1/24
+ip lan1 proxyarp on
+ipv6 lan1 address dhcp-prefix@lan2::1b:5344:8f00:0/64
+ipv6 lan1 prefix change log on
+ipv6 lan1 rtadv send 1 o_flag=on
+ipv6 lan1 dhcp service server
+switch control use lan1 on terminal=on
+description lan2 v6プラス(固定IP)
+lan linkup send-wait-time lan2 5
+ip lan2 address dhcp
+ipv6 lan2 secure filter in 101000 101001 101002 101003 101100 101102 101101
+ipv6 lan2 secure filter out 101099 dynamic 101080 101081 101082 101083 101084 101085 101098 101099
+ipv6 lan2 dhcp service client
+ngn type lan2 ntt
+switch control use lan2 on terminal=on
+pp select anonymous
+ pp bind tunnel3
+ pp auth request mschap-v2
+ pp auth username #### ####
+ ppp ipcp ipaddress on
+ ppp ipcp msext on
+ ppp ccp type none
+ ip pp remote address pool dhcp
+ ip pp mtu 1258
+ pp enable anonymous
+tunnel select 1
+ tunnel encapsulation ipip
+ tunnel endpoint remote address 2404:9200:225:100::65
+ ip tunnel mtu 1460
+ ip tunnel secure filter in 400003 400020 400021 400022 400023 400024 400025 400030 400032 400103 400104 400102 400105
+ ip tunnel secure filter out 400013 400020 400021 400022 400023 400024 400025 400026 400027 400099 dynamic 400080 400081 400082 400083 400084 400085 400098 400099
+ ip tunnel nat descriptor 20000
+ ip tunnel tcp mss limit auto
+ tunnel enable 1
+tunnel select 2
+ description tunnel ekawa-cloud_ipsec
+ ipsec tunnel 1
+  ipsec sa policy 1 1 esp aes-cbc sha-hmac
+  ipsec ike keepalive log 1 off
+  ipsec ike keepalive use 1 on heartbeat 10 6
+  ipsec ike local address 1 192.168.200.1
+  ipsec ike nat-traversal 1 on
+  ipsec ike pre-shared-key 1 text sakana
+  ipsec ike remote address 1 106.178.112.192
+ ip tunnel mtu 1460
+ ip tunnel tcp mss limit auto
+ tunnel enable 2
+tunnel select 3
+ tunnel encapsulation l2tp
+ ipsec tunnel 2
+  ipsec sa policy 2 2 esp aes-cbc sha-hmac
+  ipsec ike keepalive use 2 off
+  ipsec ike nat-traversal 2 on
+  ipsec ike pre-shared-key 2 text uni-cloud_l2tp
+  ipsec ike remote address 2 any
+ l2tp tunnel disconnect time off
+ ip tunnel tcp mss limit auto
+ tunnel enable 3
+ip filter 400000 reject 10.0.0.0/8 * * * *
+ip filter 400001 reject 172.16.0.0/12 * * * *
+ip filter 400002 reject 192.168.0.0/16 * * * *
+ip filter 400003 reject 192.168.200.0/24 * * * *
+ip filter 400010 reject * 10.0.0.0/8 * * *
+ip filter 400011 reject * 172.16.0.0/12 * * *
+ip filter 400012 reject * 192.168.0.0/16 * * *
+ip filter 400013 reject * 192.168.200.0/24 * * *
+ip filter 400020 reject * * udp,tcp 135 *
+ip filter 400021 reject * * udp,tcp * 135
+ip filter 400022 reject * * udp,tcp netbios_ns-netbios_ssn *
+ip filter 400023 reject * * udp,tcp * netbios_ns-netbios_ssn
+ip filter 400024 reject * * udp,tcp 445 *
+ip filter 400025 reject * * udp,tcp * 445
+ip filter 400026 restrict * * tcpfin * www,21,nntp
+ip filter 400027 restrict * * tcprst * www,21,nntp
+ip filter 400030 pass * 192.168.200.0/24 icmp * *
+ip filter 400031 pass * 192.168.200.0/24 established * *
+ip filter 400032 pass * 192.168.200.0/24 tcp * ident
+ip filter 400033 pass * 192.168.200.0/24 tcp ftpdata *
+ip filter 400034 pass * 192.168.200.0/24 tcp,udp * domain
+ip filter 400035 pass * 192.168.200.0/24 udp domain *
+ip filter 400036 pass * 192.168.200.0/24 udp * ntp
+ip filter 400037 pass * 192.168.200.0/24 udp ntp *
+ip filter 400099 pass * * * * *
+ip filter 400100 reject *.ap.nuro.jp,*.ap.so-net.ne.jp * udp * *
+ip filter 400101 reject * *.ap.nuro.jp,*.ap.so-net.ne.jp udp * *
+ip filter 400102 pass * 192.168.200.20 tcp * 4662,16881
+ip filter 400103 pass * 192.168.200.1 udp * 500,4500,1701
+ip filter 400104 pass * 192.168.200.1 esp
+ip filter 400105 pass * 192.168.200.20 udp * 6881,4672
+ip filter 500000 restrict * * * * *
+ip filter dynamic 400080 * * ftp
+ip filter dynamic 400081 * * domain
+ip filter dynamic 400082 * * www
+ip filter dynamic 400083 * * smtp
+ip filter dynamic 400084 * * pop3
+ip filter dynamic 400085 * * submission
+ip filter dynamic 400098 * * tcp
+ip filter dynamic 400099 * * udp
+nat descriptor type 20000 masquerade
+nat descriptor address outer 20000 27.83.68.143
+nat descriptor masquerade incoming 20000 reject 
+nat descriptor masquerade static 20000 1001 192.168.200.1 esp
+nat descriptor masquerade static 20000 1002 192.168.200.1 udp 500,4500,1701
+nat descriptor masquerade static 20000 1003 192.168.200.20 tcp 4662,16881
+nat descriptor masquerade static 20000 1004 192.168.200.20 udp 6881,4672
+ipsec use on
+ipsec auto refresh on
+ipsec transport 3 2 udp 1701
+ipv6 filter 101000 pass * * icmp6 * *
+ipv6 filter 101001 pass * * tcp * ident
+ipv6 filter 101002 pass * * udp * 546
+ipv6 filter 101003 pass * * 4
+ipv6 filter 101099 pass * * * * *
+ipv6 filter 101100 pass * 240b:250:7c20:e00:1b:5344:8f00:0 udp * 500,4500,1701
+ipv6 filter 101101 pass * 240b:250:7c20:e00:1efd:8ff:fe70:4100 tcp * 873,10022
+ipv6 filter 101102 pass * 240b:250:7c20:e00:1b:5344:8f00:0 esp
+ipv6 filter dynamic 101080 * * ftp
+ipv6 filter dynamic 101081 * * domain
+ipv6 filter dynamic 101082 * * www
+ipv6 filter dynamic 101083 * * smtp
+ipv6 filter dynamic 101084 * * pop3
+ipv6 filter dynamic 101085 * * submission
+ipv6 filter dynamic 101098 * * tcp
+ipv6 filter dynamic 101099 * * udp
+syslog debug on
+telnetd host lan1
+dhcp service server
+dhcp server rfc2131 compliant except remain-silent
+dhcp scope 1 192.168.200.101-192.168.200.199/24
+dhcp client release linkdown on
+dns host lan1
+dns service fallback on
+dns server dhcp lan2
+dns server select 500000 dhcp lan2 any .
+dns private address spoof on
+ip host nas.uni-sonia.com 192.168.200.20
+ip host router.uni-sonia.com 192.168.200.1
+l2tp service on
+httpd host lan1
+sip use on
+external-memory statistics filename prefix sd1:rtx1300
+statistics cpu on
+statistics memory on
+statistics traffic on
+statistics flow on
+statistics nat on
+statistics filter on
+statistics application on
+embedded file v6plus_map_e.lua <<EOF
+UPD_SV = "http://fcs.enabler.ne.jp/update"
+USERNAME = "####"
+PASSWORD = "####"
+WAN_IF = "LAN1"
+
+LOG_PTN = "Add%s+IPv6%s+prefix.+%(Lifetime%:%s+%d+%)%s+via%s+" .. WAN_IF .. "%s+by"
+LOG_LEVEL = "info"
+LOG_PFX = "[v6plus]"
+FAIL_MSG = "Failed to notify IPv6 address to the update server. (remaining retry: %d time(s))"
+
+function logger(msg)
+  rt.syslog(LOG_LEVEL, string.format("%s %s", LOG_PFX, msg))
+end
+
+local rtn, count, log, result
+local req_t = {}
+local res_t
+req_t.url = string.format("%s?user=%s&pass=%s", UPD_SV, USERNAME, PASSWORD)
+req_t.method = "GET"
+while true do
+  rtn = rt.syslogwatch(LOG_PTN)
+  if rtn then
+    count = 3
+    while true do
+      res_t = rt.httprequest(req_t)
+      if res_t.rtn1 then
+        logger("Notified IPv6 address to the update server.")
+        if res_t.code == 200 then
+          result = "Succeeded"
+        else
+          result = "Failed"
+        end
+        log = string.format("%s to update IPv6 address. (code=%d, body=%s)", result, res_t.code, res_t.body)
+        logger(log)
+        break
+      end
+      count = count - 1
+      if count > 0 then
+        logger(string.format(FAIL_MSG, count))
+        rt.sleep(10)
+      else
+        logger("Failed to notify IPv6 address to the update server.")
+        break
+      end
+    end
+  end
+end
+EOF
