@@ -2,15 +2,14 @@
 # MAC Address : ac:44:f2:b6:6f:00 - ac:44:f2:b6:6f:07
 # Memory 1024Mbytes, 8LAN
 # main:  RTX1300 ver=00 serial=S78002132 MAC-Address=ac:44:f2:b6:6f:00 - ac:44:f2:b6:6f:07
-# Reporting Date: Mar 12 15:07:50 2023
+# Reporting Date: Mar 14 20:54:04 2023
 administrator password encrypted *
 login user admin *
 user attribute admin administrator=2 connection=serial,telnet,remote,ssh,sftp,http gui-page=dashboard,lan-map,config login-timer=1800
 login timer 1800
 ip route default gateway tunnel 1
-ip route 192.168.100.0/24 gateway tunnel 2
+ip route 192.168.100.0/24 gateway tunnel 2 filter 500000
 ipv6 routing on
-ipv6 route 240b:250:7c00:1300::/64 gateway tunnel 2
 ipv6 route default gateway dhcp lan2
 ipv6 prefix 1 dhcp-prefix@lan2::/64
 lan flexible-port lan1=1-8,10 lan2=9
@@ -53,12 +52,11 @@ tunnel select 2
  ipsec tunnel 1
   ipsec sa policy 1 1 esp aes-cbc sha-hmac
   ipsec ike keepalive log 1 off
-  ipsec ike keepalive use 1 on heartbeat 10 6
-  ipsec ike local address 1 192.168.200.1
+  ipsec ike keepalive use 1 on
   ipsec ike nat-traversal 1 on
   ipsec ike pre-shared-key 1 text sakana
-  ipsec ike remote address 1 106.178.112.192
- ip tunnel mtu 1460
+  ipsec ike remote address 1 ekawacloud.i.open.ad.jp
+ ip tunnel mtu 1300
  ip tunnel tcp mss limit auto
  tunnel enable 2
 tunnel select 3
@@ -151,6 +149,7 @@ dns server select 500000 dhcp lan2 any .
 dns private address spoof on
 ip host nas.uni-sonia.com 192.168.200.20
 ip host router.uni-sonia.com 192.168.200.1
+schedule at 1 5/* *:*:00 * lua -e "rt.command(\"ping6 update-2e2ec28fb71e3ccb45.i.open.ad.jp\")"
 l2tp service on
 httpd host lan1
 sip use on
@@ -211,3 +210,4 @@ while true do
   end
 end
 EOF
+Copyright © 2014 - 2022 Yamaha Corpo
